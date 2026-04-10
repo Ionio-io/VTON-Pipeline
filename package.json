@@ -1,0 +1,29 @@
+{
+  "name": "virtual-tryon",
+  "version": "1.0.0",
+  "description": "A web-based virtual try-on application powered by AI",
+  "main": "public/index.html",
+  "scripts": {
+    "start": "python3 -m http.server 8080",
+    "dev": "python3 -m http.server 8000"
+  },
+  "keywords": [
+    "virtual-tryon",
+    "fashion",
+    "ai",
+    "catvton",
+    "kling",
+    "fal.ai",
+    "runpod"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/VTON.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/VTON/issues"
+  },
+  "homepage": "https://github.com/yourusername/VTON#readme"
+}
