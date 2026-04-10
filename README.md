@@ -64,10 +64,6 @@ A web-based virtual try-on application powered by AI. Upload a photo and a garme
   - Format: `key_id:key_secret`
   - Used for: CatVTON, Kling Kolors, Nano Banana Pro, Qwen Image Max
 
-- **RunPod Credentials**: Required only for FASHN model
-  - Endpoint ID: Your RunPod endpoint
-  - API Key: From [RunPod API Keys](https://www.runpod.io/console/api-keys)
-
 ### Model Options
 
 | Model             | API    | Cost     | Quality   |
@@ -95,41 +91,6 @@ A web-based virtual try-on application powered by AI. Upload a photo and a garme
 - **Seed**: 0-999999 (for reproducible results)
 - **Category**: Tops, Bottoms, Dresses
 
-## 🔐 Security
-
-⚠️ **IMPORTANT**: Never commit `.env` file with real API keys to GitHub.
-
-- `.env` is in `.gitignore` to prevent accidental commits
-- Always use `.env.example` as a template
-- Keep your API keys private and never share them
-
-## 🐛 Troubleshooting
-
-### CORS Errors / "Set Key" Message
-
-- Make sure you're running `python3 server.py`, NOT `python3 -m http.server`
-- The custom server.py reads your `.env` file and provides keys to the app
-- Ensure your `.env` file exists in the project root with correct keys
-
-### API Key Invalid
-
-- Check `.env` file has correct format: `key_id:key_secret` (with colon)
-- Verify keys from respective dashboards (fal.ai, RunPod)
-- Restart the server after changing `.env`
-
-### Server Not Starting
-
-- Make sure you have Python 3.6+
-- Try: `python3 --version`
-- Check that the `.env` file exists
-- Look at console output for errors
-
-### Long Processing Time
-
-- Check API status pages (normal: 30-120 seconds)
-- Consider using faster models (CatVTON, Kling)
-- Check browser console for detailed logs
-
 ## 📝 Project Structure
 
 ```
@@ -149,31 +110,6 @@ VTON/
     ├── SECURITY.md         # Security policy
     └── CONTRIBUTING.md     # Contribution guide
 ```
-
-## 🚀 Deployment
-
-### Deploy to Vercel / Netlify
-
-1. Push to GitHub
-2. Connect repository to Vercel/Netlify
-3. Set environment variables in dashboard (same as `.env.example`)
-4. Deploy
-
-### Deploy to Your Server
-
-```bash
-# Set environment variables
-export FAL_KEY="your_key_id:your_key_secret"
-export RP_EP="your_endpoint_id"
-export RP_KEY="your_api_key"
-
-# Run the server
-python3 server.py
-```
-
-## 📄 License
-
-[Your License Here]
 
 ## 🤝 Contributing
 
