@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<<<<<<< HEAD
 <title>Virtual Try-On</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;1,400;1,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
@@ -17,6 +18,29 @@ nav{position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:100;back
 h1{font-family:'Playfair Display',Georgia,serif;font-weight:400;font-size:clamp(34px,5vw,52px);color:var(--ink);text-align:center;line-height:1.2;margin-bottom:14px}h1 em{font-style:italic;color:var(--gd)}
 .sub{font-size:15px;color:var(--mut);text-align:center;max-width:440px;line-height:1.7;margin-bottom:36px}
 .app{max-width:1100px;margin:0 auto;padding:0 24px 40px}
+=======
+<title>Virtual Try-On & Cloth Segmentation</title>
+<meta name="description" content="AI-powered virtual try-on and clothing segmentation.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>👔</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;1,400;1,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{--g:#D4AF37;--gd:#C9A227;--gb:#FFD700;--gg:rgba(201,162,39,.3);--gs:rgba(201,162,39,.12);--ink:#0F172A;--body:#4a4a4a;--mut:#888;--w:#FDFBF7;--bdr:rgba(0,0,0,.06);--r:14px;--pill:50px;--e:cubic-bezier(.25,.8,.25,1)}
+body{font-family:'Inter',-apple-system,sans-serif;color:var(--body);background:#fff;-webkit-font-smoothing:antialiased;line-height:1.6}
+nav{position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:100;background:rgba(255,255,255,.82);backdrop-filter:blur(24px) saturate(180%);border:1px solid rgba(255,255,255,.5);border-radius:var(--pill);padding:10px 28px;box-shadow:0 8px 32px rgba(0,0,0,.06);display:flex;align-items:center;gap:16px}
+.logo{font-family:'Palatino Linotype',Palatino,serif;font-size:20px;font-weight:600;color:var(--ink)}.logo em{color:var(--gd);font-style:normal}
+.hero{min-height:100vh;background:linear-gradient(#fffae8,#fff 58%);display:flex;flex-direction:column;align-items:center;padding:100px 24px 40px}
+.kick{font-family:'JetBrains Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:2.5px;color:var(--gd);margin:10px 0 18px}
+h1{font-family:'Playfair Display',Georgia,serif;font-weight:400;font-size:clamp(32px,5vw,52px);color:var(--ink);text-align:center;line-height:1.2;margin-bottom:14px}h1 em{font-style:italic;color:var(--gd)}
+.sub{font-size:15px;color:var(--mut);text-align:center;max-width:440px;line-height:1.7;margin-bottom:30px}
+.mode-toggle{display:flex;justify-content:center;margin-bottom:34px}
+.toggle-track{position:relative;display:flex;background:var(--w);border:1.5px solid var(--bdr);border-radius:var(--pill);padding:4px;box-shadow:inset 0 1px 3px rgba(0,0,0,.04)}
+.toggle-track .slider{position:absolute;top:4px;left:4px;width:calc(50% - 4px);height:calc(100% - 8px);background:linear-gradient(135deg,var(--g),var(--gb));border-radius:var(--pill);transition:transform .35s var(--e);box-shadow:0 2px 12px var(--gg),0 0 24px rgba(212,175,55,.12);z-index:1}
+.toggle-track.seg .slider{transform:translateX(100%)}
+.toggle-opt{position:relative;z-index:2;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:500;letter-spacing:.5px;padding:10px 32px;cursor:pointer;transition:color .3s;user-select:none;text-align:center;min-width:160px;color:var(--mut)}
+.toggle-opt.active{color:#0a0a0a;font-weight:600}
+.app{max-width:1100px;width:100%;margin:0 auto;padding:0 24px 40px}
+>>>>>>> 98f2a88 (Initial commit - vton app)
 .sbar{text-align:center;min-height:24px;margin-bottom:6px}
 #status{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--mut)}
 .err{color:#B8494A!important}.ok{color:var(--gd)!important}
@@ -49,6 +73,7 @@ input[type=number]:focus{outline:none;border-color:var(--g);box-shadow:0 0 0 3px
 .rimg{width:100%;aspect-ratio:3/4;object-fit:cover;border-radius:8px;display:none}
 .dlbtn{font-size:11px;color:var(--gd);background:0;border:1px solid rgba(212,175,55,.3);border-radius:var(--pill);padding:4px 14px;cursor:pointer;margin-top:8px;display:none}
 .dlbtn:hover{background:rgba(212,175,55,.08)}
+<<<<<<< HEAD
 #logArea{max-width:1100px;margin:0 auto 40px;padding:0 24px}
 #logToggle{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--mut);cursor:pointer;text-align:center;padding:8px;border:1px solid var(--bdr);border-radius:8px;margin-bottom:6px}
 #logToggle:hover{border-color:var(--gd);color:var(--gd)}
@@ -138,5 +163,202 @@ footer{text-align:center;padding:28px 24px;border-top:1px solid var(--bdr)}foote
 <script src="config.js"></script>
 <script src="app.js"></script>
 
+=======
+.panel{display:none;animation:fadeIn .35s ease}.panel.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.seg-person{max-width:320px;margin:0 auto 20px}
+.seg-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+.seg-card{background:var(--w);border:1px solid var(--bdr);border-radius:var(--r);padding:10px;text-align:center}
+.seg-card .seg-label{font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--mut);margin-bottom:8px}
+.seg-card img{width:100%;aspect-ratio:3/4;object-fit:contain;border-radius:6px;background:#f5f5f5;display:none}
+.seg-card .seg-empty{font-size:11px;color:rgba(0,0,0,.15);padding:40px 0}
+.seg-card .seg-dl{font-size:10px;color:var(--gd);background:0;border:1px solid rgba(212,175,55,.25);border-radius:var(--pill);padding:3px 10px;cursor:pointer;margin-top:6px;display:none}
+.seg-card .seg-dl:hover{background:rgba(212,175,55,.08)}
+.seg-labels{margin-top:14px;text-align:center}
+.seg-tag{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:11px;background:rgba(212,175,55,.08);color:var(--ink);padding:4px 12px;border-radius:var(--pill);margin:3px}
+.seg-pct{color:var(--gd);font-weight:600}
+footer{text-align:center;padding:28px 24px;border-top:1px solid var(--bdr)}footer p{font-size:11px;color:#bbb}footer a{color:var(--gd);text-decoration:none}
+@media(max-width:768px){.row{grid-template-columns:1fr}.ctrl{gap:6px}h1{font-size:28px}.seg-grid{grid-template-columns:1fr 1fr}.toggle-opt{padding:8px 18px;min-width:130px;font-size:11px}}
+</style>
+</head>
+<body>
+<nav><div class="logo">Virtual<em>.</em>TryOn</div></nav>
+<section class="hero">
+<div class="kick">AI-POWERED FASHION</div>
+<h1>See How It <em>Looks</em></h1>
+<p class="sub">Try on clothes virtually or extract and analyze garments from any photo.</p>
+<div class="mode-toggle"><div class="toggle-track" id="toggleTrack"><div class="slider"></div><div class="toggle-opt active" id="optV" onclick="switchMode('vton')">Virtual Try-On</div><div class="toggle-opt" id="optS" onclick="switchMode('seg')">Cloth Segmentation</div></div></div>
+<div class="app">
+<div class="sbar"><span id="status"></span></div>
+
+<!-- VTON -->
+<div class="panel active" id="panelV">
+<div class="mi">Model: <b id="mLabel">CatVTON</b><span class="pt" id="mPrice">~$0.01</span></div>
+<div class="ctrl">
+<div class="cg"><span class="cl">Model</span><select id="selModel" onchange="onModelChange()"><option value="catvton">CatVTON (fal)</option><option value="kling">Kling Kolors v1.5 (fal)</option><option value="nbp">Nano Banana Pro (fal)</option><option value="qwen">Qwen Image Max (fal)</option><option value="fashn">FASHN v1.5 (RunPod)</option></select></div>
+<div class="cg"><span class="cl">Category</span><select id="selCat"><option value="tops">Tops</option><option value="bottoms">Bottoms</option><option value="dresses">Dresses</option></select></div>
+<div class="cg"><span class="cl">Steps <span style="color:var(--gd)" id="stepsVal">30</span></span><input type="range" id="selSteps" min="10" max="50" value="30" step="5" oninput="document.getElementById('stepsVal').textContent=this.value"></div>
+<div class="cg"><span class="cl">Seed</span><input type="number" id="selSeed" value="42" min="0" max="999999"></div>
+<button class="btn" id="btnGo" onclick="doTryOn()">Try On</button>
+</div>
+<div class="row">
+<div class="card" id="cardP"><input type="file" accept="image/*" onchange="onFile(this,'person')"><div class="placeholder"><div class="ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div><div class="lab">Person</div><div class="hint">Click to upload</div></div><img class="preview" id="prevP"></div>
+<div class="card" id="cardG"><input type="file" accept="image/*" onchange="onFile(this,'garment')"><div class="placeholder"><div class="ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.38 3.46L16 2 12 5.5 8 2l-4.38 1.46a1 1 0 00-.62.94V19a1 1 0 001 1h16a1 1 0 001-1V4.4a1 1 0 00-.62-.94z"/></svg></div><div class="lab">Garment</div><div class="hint">Click to upload</div></div><img class="preview" id="prevG"></div>
+<div class="rcard"><span class="rl">Result</span><div class="re" id="resE">Result appears here</div><img class="rimg" id="resI"><button class="dlbtn" id="btnDl" onclick="dlResult()">Download</button></div>
+</div>
+</div>
+
+<!-- SEG -->
+<div class="panel" id="panelS">
+<div class="mi">Engine: <b>SegFormer-B2</b><span class="pt">RunPod Serverless</span></div>
+<div class="ctrl">
+<div class="cg"><span class="cl">Segment Type</span><select id="segType"><option value="upper">Upper (shirt/top)</option><option value="lower">Lower (pants/skirt)</option><option value="dress">Dress</option><option value="all">All Clothing</option></select></div>
+<button class="btn" id="btnSeg" onclick="doSeg()">Segment Clothing</button>
+</div>
+<div class="seg-person"><div class="card" id="cardPS"><input type="file" accept="image/*" onchange="onFile(this,'person')"><div class="placeholder"><div class="ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div><div class="lab">Person</div><div class="hint">Click to upload</div></div><img class="preview" id="prevPS"></div></div>
+<div class="seg-grid">
+<div class="seg-card"><div class="seg-label">Segmentation Map</div><div class="seg-empty" id="sE1">&mdash;</div><img id="sI1"><button class="seg-dl" id="sD1" onclick="dlSeg('sI1','segmentation_map.png')">Download</button></div>
+<div class="seg-card"><div class="seg-label">Overlay</div><div class="seg-empty" id="sE2">&mdash;</div><img id="sI2"><button class="seg-dl" id="sD2" onclick="dlSeg('sI2','overlay.png')">Download</button></div>
+<div class="seg-card"><div class="seg-label">Extracted</div><div class="seg-empty" id="sE3">&mdash;</div><img id="sI3" style="background:repeating-conic-gradient(#eee 0% 25%,#fff 0% 50%) 50%/16px 16px"><button class="seg-dl" id="sD3" onclick="dlSeg('sI3','extracted.png')">Download</button></div>
+<div class="seg-card"><div class="seg-label">Clothing Mask</div><div class="seg-empty" id="sE4">&mdash;</div><img id="sI4"><button class="seg-dl" id="sD4" onclick="dlSeg('sI4','mask.png')">Download</button></div>
+</div>
+<div class="seg-labels" id="segLabels"></div>
+</div>
+</div>
+</section>
+<footer><p>Powered by <a href="https://fal.ai" target="_blank">fal.ai</a> &middot; <a href="https://runpod.io" target="_blank">RunPod</a> &middot; <a href="https://huggingface.co/mattmdjaga/segformer_b2_clothes" target="_blank">SegFormer</a></p></footer>
+
+<script>
+/* ── NO API KEYS IN THIS FILE ── */
+/* Keys are in Vercel environment variables, accessed via /api/* serverless functions */
+
+var pUri=null,gUri=null,pB64=null,gB64=null,rUrl=null;
+
+function st(h,c){var e=document.getElementById('status');e.innerHTML=h;e.className=c||'';}
+function switchMode(m){
+  document.getElementById('toggleTrack').classList.toggle('seg',m==='seg');
+  document.getElementById('optV').classList.toggle('active',m==='vton');
+  document.getElementById('optS').classList.toggle('active',m==='seg');
+  document.getElementById('panelV').classList.toggle('active',m==='vton');
+  document.getElementById('panelS').classList.toggle('active',m==='seg');
+  if(pUri&&m==='seg'){document.getElementById('prevPS').src=pUri;document.getElementById('prevPS').style.display='block';document.getElementById('cardPS').classList.add('has');}
+  if(pUri&&m==='vton'){document.getElementById('prevP').src=pUri;document.getElementById('cardP').classList.add('has');}
+  st('','');
+}
+function onModelChange(){
+  var v=document.getElementById('selModel').value;
+  document.getElementById('mLabel').textContent={catvton:'CatVTON',kling:'Kling Kolors v1.5',nbp:'Nano Banana Pro',qwen:'Qwen Image Max',fashn:'FASHN v1.5'}[v];
+  document.getElementById('mPrice').textContent={catvton:'~$0.01',kling:'$0.07',nbp:'$0.15',qwen:'$0.075',fashn:'Your GPU'}[v];
+}
+function onFile(el,type){
+  var f=el.files[0];if(!f)return;
+  var r=new FileReader();r.onload=function(e){
+    var d=e.target.result,b=d.split(',')[1];
+    if(type==='person'){pUri=d;pB64=b;document.getElementById('prevP').src=d;document.getElementById('cardP').classList.add('has');document.getElementById('prevPS').src=d;document.getElementById('prevPS').style.display='block';document.getElementById('cardPS').classList.add('has');}
+    else{gUri=d;gB64=b;document.getElementById('prevG').src=d;document.getElementById('cardG').classList.add('has');}
+  };r.readAsDataURL(f);
+}
+function showRes(u){rUrl=u;document.getElementById('resI').src=u;document.getElementById('resI').style.display='block';document.getElementById('resE').style.display='none';document.getElementById('btnDl').style.display='inline-block';st('Done!','ok');}
+function dlResult(){if(!rUrl)return;var a=document.createElement('a');a.href=rUrl;a.download='tryon_result.png';if(rUrl.startsWith('http'))a.target='_blank';a.click();}
+function dlSeg(id,fn){var i=document.getElementById(id);if(!i.src)return;var a=document.createElement('a');a.href=i.src;a.download=fn;a.click();}
+
+/* ── FAL (via /api/fal proxy) ── */
+async function falRun(endpoint,body){
+  st('<span class="sp"></span> Submitting...','');
+  var r=await fetch('/api/fal',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({endpoint,body})});
+  if(!r.ok)throw new Error(await r.text());
+  var job=await r.json();
+  st('<span class="sp"></span> Processing...','');
+  for(var i=0;i<120;i++){
+    await new Promise(function(ok){setTimeout(ok,2000)});
+    var pr=await fetch('/api/fal-poll',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({status_url:job.status_url,response_url:job.response_url})});
+    if(!pr.ok)throw new Error(await pr.text());
+    var ps=await pr.json();
+    if(ps.status==='COMPLETED')return ps.result;
+    if(ps.status==='FAILED')throw new Error('Job failed');
+    st('<span class="sp"></span> '+(ps.status==='IN_QUEUE'?'In queue...':'Generating...'),'');
+  }
+  throw new Error('Timeout');
+}
+
+/* ── RUNPOD VTON (via /api/runpod proxy) ── */
+async function rpRun(input){
+  st('<span class="sp"></span> Submitting...','');
+  var r=await fetch('/api/runpod',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({input})});
+  if(!r.ok)throw new Error(await r.text());
+  var job=await r.json();
+  for(var i=0;i<90;i++){
+    await new Promise(function(ok){setTimeout(ok,3000)});
+    var pr=await fetch('/api/runpod-poll?id='+job.id);
+    var ps=await pr.json();
+    if(ps.status==='COMPLETED'){
+      if(ps.output&&ps.output.image)return'data:image/png;base64,'+ps.output.image;
+      if(ps.output&&ps.output.error)throw new Error(ps.output.error);
+      throw new Error('No image');
+    }
+    if(ps.status==='FAILED'||ps.status==='TIMED_OUT')throw new Error(ps.status);
+    st('<span class="sp"></span> '+(ps.status==='IN_QUEUE'?'Worker starting':'Generating')+' ('+(i*3)+'s)...','');
+  }
+  throw new Error('Timeout');
+}
+
+/* ── VTON ── */
+async function doTryOn(){
+  if(!pUri){st('Upload a person photo first.','err');return;}
+  if(!gUri){st('Upload a garment image first.','err');return;}
+  var mk=document.getElementById('selModel').value,steps=+document.getElementById('selSteps').value,seed=+document.getElementById('selSeed').value,cat=document.getElementById('selCat').value,btn=document.getElementById('btnGo');
+  btn.disabled=true;btn.textContent='Processing...';
+  document.getElementById('resI').style.display='none';document.getElementById('resE').style.display='block';document.getElementById('btnDl').style.display='none';
+  try{
+    if(mk==='fashn'){showRes(await rpRun({person_image:pB64,garment_image:gB64,category:cat,garment_type:'flat-lay',steps:steps,seed:seed}));}
+    else{
+      var ep,body,ot;
+      if(mk==='catvton'){ep='fal-ai/cat-vton';body={human_image_url:pUri,garment_image_url:gUri,cloth_type:{tops:'upper',bottoms:'lower',dresses:'overall'}[cat]||'upper',num_inference_steps:steps,guidance_scale:2.5,seed:seed};ot='s';}
+      else if(mk==='kling'){ep='fal-ai/kling/v1-5/kolors-virtual-try-on';body={human_image_url:pUri,garment_image_url:gUri};ot='s';}
+      else if(mk==='nbp'){ep='fal-ai/nano-banana-pro/edit';body={prompt:"Put the garment from image 2 onto the person in image 1. Keep the person's face, body shape, pose, and background exactly the same. Only replace their clothing.",image_urls:[pUri,gUri],num_images:1,aspect_ratio:'3:4',output_format:'png',resolution:'1K',seed:seed};ot='a';}
+      else if(mk==='qwen'){ep='fal-ai/qwen-image-max/edit';body={prompt:"Replace the clothing on the person in image 1 with the garment shown in image 2. Keep the person's face, body, pose, and background unchanged.",image_urls:[pUri,gUri],num_images:1,output_format:'png',seed:seed};ot='a';}
+      var res=await falRun(ep,body);
+      showRes(ot==='s'?res.image.url:res.images[0].url);
+    }
+  }catch(e){st(String(e.message||e).substring(0,120),'err');}
+  btn.disabled=false;btn.textContent='Try On';
+}
+
+/* ── SEGMENTATION (via /api/segment proxy) ── */
+async function doSeg(){
+  if(!pB64){st('Upload a person photo first.','err');return;}
+  var ct=document.getElementById('segType').value,btn=document.getElementById('btnSeg');
+  btn.disabled=true;btn.textContent='Segmenting...';
+  ['sI1','sI2','sI3','sI4'].forEach(function(id){document.getElementById(id).style.display='none';});
+  ['sE1','sE2','sE3','sE4'].forEach(function(id){document.getElementById(id).style.display='block';});
+  ['sD1','sD2','sD3','sD4'].forEach(function(id){document.getElementById(id).style.display='none';});
+  document.getElementById('segLabels').innerHTML='';
+  st('<span class="sp"></span> Submitting...','');
+  try{
+    var r=await fetch('/api/segment',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({input:{image:pB64,cloth_type:ct}})});
+    if(!r.ok)throw new Error(await r.text());
+    var job=await r.json();
+    var out=null;
+    for(var i=0;i<60;i++){
+      await new Promise(function(ok){setTimeout(ok,2000)});
+      var pr=await fetch('/api/segment-poll?id='+job.id);
+      var ps=await pr.json();
+      if(ps.status==='COMPLETED'){if(ps.output&&ps.output.error)throw new Error(ps.output.error);out=ps.output;break;}
+      if(ps.status==='FAILED'||ps.status==='TIMED_OUT')throw new Error(ps.status);
+      st('<span class="sp"></span> '+(ps.status==='IN_QUEUE'?'Worker starting':'Segmenting')+' ('+(i*2)+'s)...','');
+    }
+    if(!out)throw new Error('Timeout');
+    [['sI1','sE1','sD1',out.segmentation_map],['sI2','sE2','sD2',out.overlay],['sI3','sE3','sD3',out.extracted_cropped],['sI4','sE4','sD4',out.clothing_mask]].forEach(function(o){
+      if(o[3]){document.getElementById(o[0]).src='data:image/png;base64,'+o[3];document.getElementById(o[0]).style.display='block';document.getElementById(o[1]).style.display='none';document.getElementById(o[2]).style.display='inline-block';}
+    });
+    var ld=document.getElementById('segLabels');
+    if(out.detected_labels)Object.entries(out.detected_labels).sort(function(a,b){return b[1]-a[1]}).forEach(function(e){if(e[0]==='Background')return;var t=document.createElement('span');t.className='seg-tag';t.innerHTML=e[0]+' <span class="seg-pct">'+e[1]+'%</span>';ld.appendChild(t);});
+    st('Done! ('+(out.processing_time||'?')+'s)','ok');
+  }catch(e){st(String(e.message||e).substring(0,120),'err');}
+  btn.disabled=false;btn.textContent='Segment Clothing';
+}
+onModelChange();
+</script>
+>>>>>>> 98f2a88 (Initial commit - vton app)
 </body>
 </html>

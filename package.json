@@ -1,4 +1,5 @@
 {
+<<<<<<< HEAD
   "name": "virtual-tryon",
   "version": "1.0.0",
   "description": "A web-based virtual try-on application powered by AI",
@@ -26,4 +27,9 @@
     "url": "https://github.com/yourusername/VTON/issues"
   },
   "homepage": "https://github.com/yourusername/VTON#readme"
+=======
+  "name": "vton-app",
+  "version": "1.0.0",
+  "private": true
+>>>>>>> 98f2a88 (Initial commit - vton app)
 }
