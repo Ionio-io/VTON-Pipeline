@@ -1,0 +1,12 @@
+node_modules/
+.DS_Store
+.vercel
+.env
+.env.local
+output/
+test.html
+test_api.py
+person.png
+*.jpg
+*.png
+!public/**
