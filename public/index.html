@@ -87,7 +87,7 @@ footer{text-align:center;padding:28px 24px;border-top:1px solid var(--bdr)}foote
 <div class="panel active" id="panelV">
 <div class="mi">Model: <b id="mLabel">CatVTON</b><span class="pt" id="mPrice">~$0.01</span></div>
 <div class="ctrl">
-<div class="cg"><span class="cl">Model</span><select id="selModel" onchange="onModelChange()"><option value="catvton">CatVTON (fal)</option><option value="kling">Kling Kolors v1.5 (fal)</option><option value="nbp">Nano Banana Pro (fal)</option><option value="qwen">Qwen Image Max (fal)</option><option value="fashn">FASHN v1.5 (RunPod)</option></select></div>
+<div class="cg"><span class="cl">Model</span><select id="selModel" onchange="onModelChange()"><option value="catvton">CatVTON (fal)</option><option value="kling">Kling Kolors v1.5 (fal)</option><option value="nbp">Nano Banana Pro (fal)</option><option value="qwen">Qwen Image Max (fal)</option><option value="qwen-edit">Qwen Image Edit 2511 (fal)</option><option value="fashn">FASHN v1.5 (RunPod)</option></select></div>
 <div class="cg"><span class="cl">Category</span><select id="selCat"><option value="tops">Tops</option><option value="bottoms">Bottoms</option><option value="dresses">Dresses</option></select></div>
 <div class="cg"><span class="cl">Steps <span style="color:var(--gd)" id="stepsVal">30</span></span><input type="range" id="selSteps" min="10" max="50" value="30" step="5" oninput="document.getElementById('stepsVal').textContent=this.value"></div>
 <div class="cg"><span class="cl">Seed</span><input type="number" id="selSeed" value="42" min="0" max="999999"></div>
@@ -139,8 +139,8 @@ function switchMode(m){
 }
 function onModelChange(){
   var v=document.getElementById('selModel').value;
-  document.getElementById('mLabel').textContent={catvton:'CatVTON',kling:'Kling Kolors v1.5',nbp:'Nano Banana Pro',qwen:'Qwen Image Max',fashn:'FASHN v1.5'}[v];
-  document.getElementById('mPrice').textContent={catvton:'~$0.01',kling:'$0.07',nbp:'$0.15',qwen:'$0.075',fashn:'Your GPU'}[v];
+  document.getElementById('mLabel').textContent={catvton:'CatVTON',kling:'Kling Kolors v1.5',nbp:'Nano Banana Pro',qwen:'Qwen Image Max','qwen-edit':'Qwen Image Edit 2511',fashn:'FASHN v1.5'}[v];
+  document.getElementById('mPrice').textContent={catvton:'~$0.01',kling:'$0.07',nbp:'$0.15',qwen:'$0.075','qwen-edit':'$0.03/MP',fashn:'Your GPU'}[v];
 }
 function onFile(el,type){
   var f=el.files[0];if(!f)return;
@@ -209,6 +209,7 @@ async function doTryOn(){
       else if(mk==='kling'){ep='fal-ai/kling/v1-5/kolors-virtual-try-on';body={human_image_url:pUri,garment_image_url:gUri};ot='s';}
       else if(mk==='nbp'){ep='fal-ai/nano-banana-pro/edit';body={prompt:"Put the garment from image 2 onto the person in image 1. Keep the person's face, body shape, pose, and background exactly the same. Only replace their clothing.",image_urls:[pUri,gUri],num_images:1,aspect_ratio:'3:4',output_format:'png',resolution:'1K',seed:seed};ot='a';}
       else if(mk==='qwen'){ep='fal-ai/qwen-image-max/edit';body={prompt:"Replace the clothing on the person in image 1 with the garment shown in image 2. Keep the person's face, body, pose, and background unchanged.",image_urls:[pUri,gUri],num_images:1,output_format:'png',seed:seed};ot='a';}
+      else if(mk==='qwen-edit'){ep='fal-ai/qwen-image-edit-2511';body={prompt:"Replace the clothing on the person in image 1 with the garment shown in image 2. Keep the person's face, hair, body shape, pose, and background exactly the same. Only change the clothing.",image_urls:[pUri,gUri],num_inference_steps:28,guidance_scale:4.5,num_images:1,output_format:'png',seed:seed};ot='a';}
       var res=await falRun(ep,body);
       showRes(ot==='s'?res.image.url:res.images[0].url);
     }
