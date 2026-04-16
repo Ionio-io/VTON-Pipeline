@@ -1,0 +1,36 @@
+FROM nvidia/cuda:12.4.1-runtime-ubuntu22.04
+
+# Python 3.10 (default on Ubuntu 22.04 — guaranteed to work)
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends python3 python3-pip git && \
+    ln -sf /usr/bin/python3 /usr/bin/python && \
+    pip3 install --upgrade pip setuptools wheel && \
+    rm -rf /var/lib/apt/lists/*
+
+WORKDIR /
+
+# PyTorch 2.4.0 for CUDA 12.4 (Python 3.10 wheel)
+RUN pip install --no-cache-dir \
+    torch==2.4.0 torchvision==0.19.0 \
+    --index-url https://download.pytorch.org/whl/cu124
+
+# Clone FASHN repo
+RUN git clone --depth 1 https://github.com/fashn-AI/fashn-vton-1.5.git
+
+# Install FASHN (not editable — pyproject.toml doesn't support -e)
+RUN cd /fashn-vton-1.5 && pip install . --no-cache-dir
+
+# Install RunPod SDK
+RUN pip install --no-cache-dir runpod
+
+# Download model weights (~2GB) + DWPose + HumanParser
+# DO NOT delete /root/.cache/huggingface — HumanParser lives there
+RUN cd /fashn-vton-1.5 && python scripts/download_weights.py --weights-dir ./weights
+
+# Clean only pip cache (keep HuggingFace cache intact)
+RUN rm -rf /root/.cache/pip
+
+# Copy handler
+COPY serverless_handler.py /serverless_handler.py
+
+CMD ["python", "-u", "/serverless_handler.py"]
