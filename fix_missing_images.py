@@ -31,7 +31,7 @@ def download_images(product: dict) -> list[str]:
             paths.append(str(dest))
             time.sleep(0.08)
         except Exception as e:
-            print(f"    ⚠️  {idx}: {e}")
+            print(f"    WARNING?  {idx}: {e}")
     return paths
 
 
@@ -45,15 +45,15 @@ def main():
             if not p["local_images"]:
                 print(f"  Downloading: {p['title'][:60]}")
                 p["local_images"] = download_images(p)
-                print(f"    → {len(p['local_images'])} images saved")
+                print(f"    -> {len(p['local_images'])} images saved")
                 changed = True
                 total_fixed += 1
         if changed:
             with open(path, "w", encoding="utf-8") as f:
                 json.dump(products, f, indent=2, ensure_ascii=False)
-            print(f"  💾 Saved {fname}\n")
+            print(f"  ? Saved {fname}\n")
 
-    print(f"\n✅ Fixed {total_fixed} products.")
+    print(f"\n[OK] Fixed {total_fixed} products.")
 
 
 if __name__ == "__main__":

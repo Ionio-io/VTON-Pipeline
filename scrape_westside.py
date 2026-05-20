@@ -1,5 +1,5 @@
 """
-Westside Product Scraper — Fashion Try-On Dataset
+Westside Product Scraper -- Fashion Try-On Dataset
 ==================================================
 Scrapes 50 men + 50 women clothing products from westside.com.
 Skips footwear, accessories, kids, and anything not try-on relevant.
@@ -12,13 +12,13 @@ Usage:
 
 Output:
     westside_dataset/
-        products_men.json        ← 50 men's clothing items
-        products_women.json      ← 50 women's clothing items
+        products_men.json        <- 50 men's clothing items
+        products_women.json      <- 50 women's clothing items
         images/
             {product-handle}/
                 1.jpg, 2.jpg, ...
 
-Requirements: no extra packages — uses stdlib only (urllib, json, pathlib)
+Requirements: no extra packages -- uses stdlib only (urllib, json, pathlib)
 """
 
 import json
@@ -28,7 +28,7 @@ import urllib.request
 import urllib.error
 from pathlib import Path
 
-# ── Config ────────────────────────────────────────────────────────────────────
+# -- Config --------------------------------------------------------------------
 
 BASE_URL     = "https://www.westside.com/products.json"
 OUTPUT_DIR   = Path("westside_dataset")
@@ -46,7 +46,7 @@ HEADERS = {
     )
 }
 
-# ── Category filters ──────────────────────────────────────────────────────────
+# -- Category filters ----------------------------------------------------------
 
 CLOTHING_TYPES = {
     "T-Shirts", "Shirts", "Tops", "Blouses", "Tunics",
@@ -74,7 +74,7 @@ KIDS_TAGS   = {"Kids", "Boy", "Girl", "Boys", "Girls", "Junior", "Baby", "Infant
 MALE_TAGS   = {"Male", "Man", "Men", "Mens", "Gents"}
 FEMALE_TAGS = {"Female", "Woman", "Women", "Womens", "Ladies", "Lady"}
 
-# ── Helpers ───────────────────────────────────────────────────────────────────
+# -- Helpers -------------------------------------------------------------------
 
 def fetch_page(page: int, limit: int) -> list[dict]:
     url = f"{BASE_URL}?page={page}&limit={limit}"
@@ -175,7 +175,7 @@ def download_images(product: dict, resume: bool) -> list[str]:
             local_paths.append(str(dest))
             time.sleep(IMAGE_DELAY)
         except Exception as e:
-            print(f"      ⚠️  Image {idx} failed: {e}")
+            print(f"      WARNING?  Image {idx} failed: {e}")
 
     return local_paths
 
@@ -199,28 +199,28 @@ def print_summary(men: list[dict], women: list[dict]):
 
     total_imgs = sum(len(p["local_images"]) for p in men + women)
 
-    print(f"\n{'═'*65}")
+    print(f"\n{'='*65}")
     print(f"  SCRAPE COMPLETE")
-    print(f"{'═'*65}")
-    print(f"  Men's products   : {len(men):3d}  →  westside_dataset/products_men.json")
-    print(f"  Women's products : {len(women):3d}  →  westside_dataset/products_women.json")
+    print(f"{'='*65}")
+    print(f"  Men's products   : {len(men):3d}  ->  westside_dataset/products_men.json")
+    print(f"  Women's products : {len(women):3d}  ->  westside_dataset/products_women.json")
     print(f"  Total images     : {total_imgs}")
     print(f"  Images folder    : westside_dataset/images/")
 
     for label, products in [("MEN", men), ("WOMEN", women)]:
         types = Counter(p["product_type"] for p in products)
-        print(f"\n  {label} — top categories:")
+        print(f"\n  {label} -- top categories:")
         for ptype, count in types.most_common(8):
             print(f"    {count:3d}x  {ptype}")
 
-    print(f"{'═'*65}\n")
+    print(f"{'='*65}\n")
 
 
-# ── Main ──────────────────────────────────────────────────────────────────────
+# -- Main ----------------------------------------------------------------------
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Scrape Westside.com — 50 men + 50 women clothing items"
+        description="Scrape Westside.com -- 50 men + 50 women clothing items"
     )
     parser.add_argument(
         "--per-gender", type=int, default=50,
@@ -236,7 +236,7 @@ def main():
     )
     parser.add_argument(
         "--no-images", action="store_true",
-        help="Metadata only — skip image downloads"
+        help="Metadata only -- skip image downloads"
     )
     args = parser.parse_args()
 
@@ -250,7 +250,7 @@ def main():
     women, seen_women = load_existing(women_path)
     seen_all = seen_men | seen_women
 
-    print(f"\n🛍️   Westside Fashion Scraper")
+    print(f"\n??   Westside Fashion Scraper")
     print(f"    Target      : {target} men + {target} women")
     print(f"    Per page    : {per_page}")
     print(f"    Resume      : {args.resume}")
@@ -264,20 +264,20 @@ def main():
     page = 1
     while len(men) < target or len(women) < target:
         print(
-            f"📄  Page {page} — "
+            f"?  Page {page} -- "
             f"men {len(men)}/{target}, women {len(women)}/{target}"
         )
         try:
             raw_page = fetch_page(page, per_page)
         except urllib.error.URLError as e:
-            print(f"❌  Network error: {e}")
+            print(f"[ERR]  Network error: {e}")
             break
         except Exception as e:
-            print(f"❌  Error: {e}")
+            print(f"[ERR]  Error: {e}")
             break
 
         if not raw_page:
-            print("✅  Catalog exhausted.")
+            print("[OK]  Catalog exhausted.")
             break
 
         for raw in raw_page:
@@ -308,7 +308,7 @@ def main():
                 product["local_images"] = local_paths
 
             img_info     = f"{len(product['local_images'])} imgs" if not args.no_images else ""
-            gender_label = "♂ M" if gender == "male" else "♀ F"
+            gender_label = "? M" if gender == "male" else "? F"
             bucket_n     = len(men) + 1 if gender == "male" else len(women) + 1
             print(
                 f"  [{gender_label} {bucket_n:02d}] "
@@ -330,12 +330,12 @@ def main():
         save_json(men,   men_path)
         save_json(women, women_path)
         print(
-            f"    💾 men={len(men)}/{target}  "
+            f"    ? men={len(men)}/{target}  "
             f"women={len(women)}/{target}  saved.\n"
         )
 
         if len(raw_page) < per_page:
-            print("✅  End of catalog reached.")
+            print("[OK]  End of catalog reached.")
             break
 
         page += 1

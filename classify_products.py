@@ -1,36 +1,36 @@
 """
-LLM Product Classifier — GPT-4o Vision via OpenRouter
+LLM Product Classifier -- GPT-4o Vision via OpenRouter
 ======================================================
 Classifies each Westside product using local images sent as base64 to GPT-4o.
 
 For each product the LLM returns:
-  can_use        : true/false — usable for virtual try-on?
+  can_use        : true/false -- usable for virtual try-on?
   gender         : male | female | unisex
   image_type     : product | tryon | mixed
   category       : normalized category (t-shirt, jeans, dress, kurta, etc.)
   best_image_idx : 1-based index of the best image for the try-on step
   reasoning      : one-line explanation
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  CONFIG — set OPENROUTER_API_KEY in your environment
+--------------------------------------------------
+  CONFIG -- set OPENROUTER_API_KEY in your environment
   or paste it directly below before running
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+--------------------------------------------------
 """
 
 import os
 
-# ── ⚙️  CONFIGURE HERE ───────────────────────────────────────────────────────
+# -- ??  CONFIGURE HERE -------------------------------------------------------
 
 OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY", "YOUR_OPENROUTER_API_KEY_HERE")
 
-# GPT-4o is the best vision model — handles Indian fashion, garment types,
+# GPT-4o is the best vision model -- handles Indian fashion, garment types,
 # flat-lay vs tryon distinction extremely well.
 MODEL = "openai/gpt-4o"
 
 # Max images to send per product (GPT-4o handles up to ~10 well; all are local)
 MAX_IMAGES = 5
 
-# ─────────────────────────────────────────────────────────────────────────────
+# -----------------------------------------------------------------------------
 
 import json
 import time
@@ -58,12 +58,12 @@ VALID_CATEGORIES = {
     "loungewear", "co-ord-set", "saree", "other",
 }
 
-# ── Prompt ────────────────────────────────────────────────────────────────────
+# -- Prompt --------------------------------------------------------------------
 
 SYSTEM_PROMPT = """\
 You are an expert fashion analyst for a virtual try-on (VTON) pipeline \
 specialized in Indian e-commerce clothing. You receive product images and \
-return structured JSON. You MUST respond with ONLY valid JSON — \
+return structured JSON. You MUST respond with ONLY valid JSON -- \
 no markdown fences, no extra text.\
 """
 
@@ -88,35 +88,35 @@ Return ONLY this JSON object:
 
 RULES for each field:
 
-can_use → false ONLY if: not a wearable garment, image is corrupt/unusable,
+can_use -> false ONLY if: not a wearable garment, image is corrupt/unusable,
           or it is purely underwear/intimate wear with no outer clothing.
           Ethnic wear (kurtas, sarees, suits) = true.
 
-gender  → "male" | "female" | "unisex"
+gender  -> "male" | "female" | "unisex"
           Override the tagged gender only if the images clearly contradict it.
 
-image_type → "product" : garment shown flat, on a ghost/invisible mannequin,
+image_type -> "product" : garment shown flat, on a ghost/invisible mannequin,
                           on a hanger, or isolated on clean/white background
-                          — NO real human body visible
+                          -- NO real human body visible
              "tryon"   : a real human model is WEARING the garment;
                           you can see a person's face or body in the clothing
              "mixed"   : some images are product-type, some are tryon-type
 
-category → pick EXACTLY ONE from:
+category -> pick EXACTLY ONE from:
            t-shirt | shirt | polo | top | blouse | dress | kurta | ethnic-suit |
            pants | jeans | shorts | skirt | jacket | blazer | hoodie |
            sweatshirt | joggers | loungewear | co-ord-set | saree | other
 
-best_image_idx → 1-based index of the SINGLE BEST image for try-on processing.
+best_image_idx -> 1-based index of the SINGLE BEST image for try-on processing.
    Priority:
    1st choice: a PRODUCT image (flat-lay / mannequin) showing the FULL garment
    2nd choice: a TRYON image with full garment visible and clean background
    Never pick: close-ups, back-only shots, or images where garment is cut off
 
-reasoning → one sentence covering: image_type decision + category + best image choice\
+reasoning -> one sentence covering: image_type decision + category + best image choice\
 """
 
-# ── Image helpers ─────────────────────────────────────────────────────────────
+# -- Image helpers -------------------------------------------------------------
 
 def image_to_base64(path: str) -> tuple[str, str]:
     ext = Path(path).suffix.lower().lstrip(".")
@@ -147,10 +147,10 @@ def build_image_content(local_paths: list[str], max_images: int) -> list[dict]:
                 }
             })
         except Exception as e:
-            print(f"      ⚠️  Could not encode {path}: {e}")
+            print(f"      WARNING?  Could not encode {path}: {e}")
     return content
 
-# ── API call ──────────────────────────────────────────────────────────────────
+# -- API call ------------------------------------------------------------------
 
 def call_llm(product: dict) -> dict:
     local_paths = product.get("local_images", [])
@@ -222,7 +222,7 @@ def validate_classification(cls: dict, product: dict) -> dict:
 
     return cls
 
-# ── Dataset helpers ───────────────────────────────────────────────────────────
+# -- Dataset helpers -----------------------------------------------------------
 
 def load_json(path: Path) -> list[dict]:
     if path.exists():
@@ -236,7 +236,7 @@ def save_json(data: list[dict], path: Path):
     with open(path, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=2, ensure_ascii=False)
 
-# ── Main classification loop ──────────────────────────────────────────────────
+# -- Main classification loop --------------------------------------------------
 
 def classify_gender(gender_key: str, delay: float):
     input_path  = INPUT_FILES[gender_key]
@@ -249,10 +249,10 @@ def classify_gender(gender_key: str, delay: float):
 
     pending = [p for p in products if p["id"] not in done_ids]
 
-    print(f"\n{'─'*62}")
-    print(f"  {gender_key.upper()} — {len(products)} total | "
+    print(f"\n{'-'*62}")
+    print(f"  {gender_key.upper()} -- {len(products)} total | "
           f"{len(existing)} done | {len(pending)} remaining")
-    print(f"{'─'*62}")
+    print(f"{'-'*62}")
 
     for i, product in enumerate(pending, 1):
         n_local = len(product.get("local_images", []))
@@ -281,21 +281,21 @@ def classify_gender(gender_key: str, delay: float):
             results.append(entry)
             save_json(results, output_path)
 
-            flag = "✅" if cls["can_use"] else "🚫"
+            flag = "[OK]" if cls["can_use"] else "?"
             print(f"           {flag} can_use={cls['can_use']}  "
                   f"type={cls['image_type']}  "
                   f"cat={cls['category']}  "
                   f"best=img#{cls['best_image_idx']}")
-            print(f"           💬 {cls['reasoning'][:90]}")
+            print(f"           ? {cls['reasoning'][:90]}")
 
         except urllib.error.HTTPError as e:
             body = e.read().decode("utf-8", errors="replace")
-            print(f"           ❌ HTTP {e.code}: {body[:150]}")
+            print(f"           [ERR] HTTP {e.code}: {body[:150]}")
             results.append({**product, "llm_error": f"HTTP {e.code}: {body[:150]}"})
             save_json(results, output_path)
 
         except Exception as e:
-            print(f"           ❌ {type(e).__name__}: {e}")
+            print(f"           [ERR] {type(e).__name__}: {e}")
             results.append({**product, "llm_error": str(e)})
             save_json(results, output_path)
 
@@ -304,16 +304,16 @@ def classify_gender(gender_key: str, delay: float):
 
     usable = sum(1 for r in results if r.get("llm_can_use"))
     errors = sum(1 for r in results if "llm_error" in r)
-    print(f"\n  {gender_key.upper()} complete — "
+    print(f"\n  {gender_key.upper()} complete -- "
           f"{usable} usable, {len(results)-usable-errors} not usable, {errors} errors")
-    print(f"  Saved → {output_path}")
+    print(f"  Saved -> {output_path}")
 
 
 def print_final_summary():
     from collections import Counter
-    print(f"\n{'═'*62}")
+    print(f"\n{'='*62}")
     print("  CLASSIFICATION SUMMARY")
-    print(f"{'═'*62}")
+    print(f"{'='*62}")
     for gender_key, path in OUTPUT_FILES.items():
         data = load_json(path)
         if not data:
@@ -324,7 +324,7 @@ def print_final_summary():
         print(f"\n  {gender_key.upper()} ({len(usable)}/{len(data)} usable):")
         print(f"    Image types : {dict(types)}")
         print(f"    Categories  :", dict(cats.most_common()))
-    print(f"\n{'═'*62}\n")
+    print(f"\n{'='*62}\n")
 
 
 def main():
@@ -342,11 +342,11 @@ def main():
     args = parser.parse_args()
 
     if not OPENROUTER_API_KEY or OPENROUTER_API_KEY == "YOUR_OPENROUTER_API_KEY_HERE":
-        print("❌  Set OPENROUTER_API_KEY environment variable before running.")
+        print("[ERR]  Set OPENROUTER_API_KEY environment variable before running.")
         print("    export OPENROUTER_API_KEY=sk-or-...")
         return
 
-    print(f"\n🤖  GPT-4o Vision Classifier")
+    print(f"\n?  GPT-4o Vision Classifier")
     print(f"    Model    : {MODEL}")
     print(f"    Images   : local base64 (up to {MAX_IMAGES} per product)")
     print(f"    Delay    : {args.delay}s between calls")
