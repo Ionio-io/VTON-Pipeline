@@ -1,36 +1,74 @@
 # VTON Pipeline
 
-A complete **Virtual Try-On (VTON)** pipeline for Indian fashion e-commerce. Given a product catalogue, it:
-
-1. Scrapes product data and images from a fashion store
-2. Classifies each garment using GPT-4o Vision
-3. Generates diverse base model images (body type × skin tone matrix)
-4. Composites garments onto models using GPT Image 2 (fal.ai)
-5. Swaps the model's face with a target identity using InsightFace
+An end-to-end **Virtual Try-On pipeline** built for Indian fashion e-commerce.
+Scrapes a product catalogue, classifies garments, generates diverse model images,
+composites garments onto models, and optionally swaps the model's face with a
+target identity for personalised try-on.
 
 ---
 
-## Pipeline Overview
+## How it works
 
 ```
-┌─────────────────────────────────────────────────────────────────────┐
-│                         VTON PIPELINE                               │
-│                                                                     │
-│  Step 1             Step 2              Step 3                      │
-│  scrape_            classify_           generate_                   │
-│  westside.py  ───▶  products.py  ───▶  models.py                   │
-│  (scrape 100        (GPT-4o Vision      (GPT Image 2               │
-│   products +         classifies          generates 27               │
-│   images)            each garment)       base model PNGs)           │
-│                                               │                     │
-│                                               ▼                     │
-│  Step 4                                  Step 5                     │
-│  tryon_samples.py  ──────────────────▶  swapper_*/                 │
-│  (GPT Image 2 edit                      (InsightFace face           │
-│   composites garment                     swap for identity          │
-│   onto base model)                       personalisation)           │
-└─────────────────────────────────────────────────────────────────────┘
+Scrape          Classify         Generate Models       Try-On
+products   -->  with GPT-4o  --> (body type x      --> composite
+from            Vision           skin tone matrix)     garment onto
+westside.com                     27 base PNGs          base model
+                                                           |
+                                                    Face Swap (optional)
+                                                    replace model face
+                                                    with target identity
 ```
+
+---
+
+## Repository Structure
+
+```
+VTON-Pipeline/
+|
+|-- pipeline/                    Core pipeline scripts (run in order)
+|   |-- scrape.py                Step 1: scrape products from westside.com
+|   |-- classify.py              Step 2: classify garments with GPT-4o Vision
+|   |-- generate_models.py       Step 3: generate 27 base model images
+|   |-- tryon_gpt.py             Step 4A: try-on using GPT Image 2 edit
+|   `-- tryon_zimage.py          Step 4B: try-on using Z-Image Turbo (faster)
+|
+|-- face_swap/                   Step 5: identity personalisation
+|   |-- swap_replicate.py        Run face swap via Replicate API (easiest)
+|   |-- swap_local.py            Run face swap locally with InsightFace
+|   |-- swap_hf_space.py         Call a deployed HF Space for face swap
+|   |-- run_hf_swap.py           Swap faces on a batch of try-on images
+|   |-- run_pipeline.py          Full end-to-end: try-on + face swap
+|   |-- models/                  Place inswapper_128.onnx here
+|   `-- requirements.txt
+|
+|-- spaces/                      Hugging Face Space deployments
+|   |-- tryon/                   Z-Image Turbo try-on Space
+|   |   |-- app.py
+|   |   `-- requirements.txt
+|   `-- face_swap/               InsightFace face-swap Space
+|       |-- app.py
+|       |-- requirements.txt
+|       `-- packages.txt
+|
+|-- tests/                       Print quality and fidelity tests
+|   |-- print_fidelity.py        GPT Image 2 print accuracy at quality=low
+|   `-- sophisticated_print.py   Scenic and ethnic prints at quality=medium
+|
+|-- utils/                       Optional / advanced tools
+|   |-- fix_missing_images.py    Backfill missing product images after scraping
+|   `-- tryon_zimage_local.py    Z-Image Turbo local GPU runner (needs 16 GB VRAM)
+|
+|-- generated_images/            27 pre-generated base model PNGs (Step 3 output)
+|-- westside_dataset/            Scraped product JSON and images
+|-- prompts.json                 27 model definitions (body type x skin tone)
+|-- requirements.txt             Core dependencies
+`-- .env.example                 API key template
+```
+
+> All scripts are run from the **repository root**, e.g. `python pipeline/scrape.py`.
+> Paths inside every script resolve relative to the current working directory.
 
 ---
 
@@ -42,365 +80,308 @@ A complete **Virtual Try-On (VTON)** pipeline for Indian fashion e-commerce. Giv
 git clone https://github.com/Ionio-io/VTON-Pipeline.git
 cd VTON-Pipeline
 
-# Create and activate a virtual environment (Python 3.11 recommended)
 python -m venv .venv
-source .venv/bin/activate   # Windows: .venv\Scripts\activate
+source .venv/bin/activate      # Windows: .venv\Scripts\activate
 
 pip install -r requirements.txt
 ```
 
-### 2. Set environment variables
+### 2. Configure API keys
 
 ```bash
 cp .env.example .env
-# Edit .env and fill in your API keys
+# Edit .env and fill in your keys
 ```
 
 Or export directly:
 
 ```bash
-export FAL_KEY=your_fal_key_here
-export OPENROUTER_API_KEY=your_openrouter_key_here
+export FAL_KEY=your_fal_key
+export OPENROUTER_API_KEY=your_openrouter_key
 ```
 
 ### 3. Run the pipeline
 
 ```bash
-# Step 1 — Scrape product data
-python scrape_westside.py
-
-# Step 2 — Classify products (requires local images from Step 1)
-python classify_products.py
-
-# Step 3 — Generate base model images (skip if using pre-generated images/)
-python generate_models.py --resume
-
-# Step 4 — Generate try-on images
-python tryon_samples.py
-
-# Step 5 — Face swap (see swapper_model_test/ or swapper_handoff/)
+python pipeline/scrape.py
+python pipeline/classify.py
+python pipeline/generate_models.py --resume
+python pipeline/tryon_gpt.py
 ```
 
 ---
 
-## Repository Structure
+## Pipeline Steps
 
-```
-VTON-Pipeline/
-├── README.md
-├── .env.example                  ← copy to .env, fill in API keys
-├── requirements.txt
-├── prompts.json                  ← 27 body-type × skin-tone model definitions
-│
-├── scrape_westside.py            ← Step 1: scrape products from westside.com
-├── classify_products.py          ← Step 2: GPT-4o Vision product classifier
-├── fix_missing_images.py         ← Step 2b: backfill missing product images
-├── generate_models.py            ← Step 3: batch-generate base model images
-├── tryon_samples.py              ← Step 4: VTON composite (GPT Image 2 edit)
-├── vton_zimage.py                ← Step 4 alt: Z-Image Turbo VTON (local, fast)
-├── print_fidelity_test.py        ← quality test: micro-print & geometric prints
-├── sophisticated_print_test.py   ← quality test: scenic & ethnic prints (medium)
-│
-├── generated_images/             ← 27 pre-generated base model PNGs (Step 3 output)
-│   ├── M-REC_S3.png              ← Male, Rectangle, Medium-Olive
-│   ├── M-REC_S4.png
-│   └── ...                       ← see prompts.json for full list
-│
-├── westside_dataset/
-│   ├── products_men.json         ← 50 men's clothing items (metadata + image URLs)
-│   └── products_women.json       ← 50 women's clothing items
-│   └── images/                   ← scraped product images (run scrape_westside.py)
-│
-├── zimage_space/                 ← Z-Image Turbo VTON as a Hugging Face Space
-│   ├── app.py                    ← Gradio app + /predict API endpoint
-│   └── requirements.txt
-│
-├── swapper_model_test/           ← Step 5: face swap model testing
-│   ├── README.md                 ← detailed setup + usage guide
-│   ├── swapper_local_insightface.py   ← local InsightFace runner
-│   ├── swapper_replicate_test.py      ← Replicate API runner
-│   ├── call_hf_space.py               ← call a deployed HF Space
-│   ├── requirements-local.txt
-│   ├── requirements-replicate.txt
-│   ├── models/                   ← place inswapper_128.onnx here
-│   └── huggingface_space/        ← deploy this folder as a Gradio Space
-│       ├── app.py
-│       ├── requirements.txt
-│       └── packages.txt
-│
-└── swapper_handoff/              ← ready-to-run end-to-end face-swap scripts
-    ├── README.md
-    ├── requirements.txt
-    ├── run_hf_swap.py             ← call HF Space with custom source/target
-    └── run_westside_sample.py     ← full pipeline: crop face → call HF Space
-```
+### Step 1 — Scrape Products
 
----
-
-## Step-by-Step Guide
-
-### Step 1 — Scrape Product Data
+Scrapes 50 men's and 50 women's products from westside.com using the
+public Shopify JSON API. Downloads product images and saves metadata.
 
 ```bash
-python scrape_westside.py
-# Options:
-#   --per-gender 50   (default: 50 products per gender)
-#   --resume          (skip already-downloaded images)
-#   --no-images       (metadata only, very fast)
+python pipeline/scrape.py
+python pipeline/scrape.py --per-gender 100   # more products
+python pipeline/scrape.py --no-images        # metadata only, very fast
 ```
 
-Outputs:
+**Output:**
 - `westside_dataset/products_men.json`
 - `westside_dataset/products_women.json`
-- `westside_dataset/images/{men|women}/{product-handle}/1.jpg, 2.jpg, ...`
+- `westside_dataset/images/{men|women}/{handle}/1.jpg, 2.jpg, ...`
 
 ---
 
 ### Step 2 — Classify Products
 
-Uses GPT-4o Vision (via OpenRouter) to classify each product:
+Sends each product's images (as base64) to GPT-4o Vision via OpenRouter.
+Tags each item with category, usability flag, best image index, and reasoning.
 
 ```bash
 export OPENROUTER_API_KEY=your_key
-python classify_products.py
-# Options:
-#   --gender male|female   (only classify one gender)
-#   --delay 1.5            (seconds between API calls, default: 1.5)
+python pipeline/classify.py
+python pipeline/classify.py --gender male    # one gender only
+python pipeline/classify.py --delay 2        # seconds between API calls
 ```
 
-Each product gets: `can_use`, `gender`, `image_type`, `category`, `best_image_idx`, `reasoning`
-
-Outputs:
+**Output:**
 - `westside_dataset/classified_men.json`
 - `westside_dataset/classified_women.json`
 
+If any product images are missing after scraping, run:
+
+```bash
+python utils/fix_missing_images.py
+```
+
 ---
 
-### Step 3 — Generate Base Model Images
+### Step 3 — Generate Base Models
 
-Generates 27 diverse Indian model images (5 male + 4 female body types × 3 skin tones):
+Generates 27 diverse Indian model images covering 5 male and 4 female body
+types across 3 skin tones, using GPT Image 2 via fal.ai.
 
 ```bash
 export FAL_KEY=your_key
-python generate_models.py --resume
-# Options:
-#   --gender male|female   (only generate one gender)
-#   --delay 2.0            (seconds between requests)
-#   --resume               (skip already-generated images)
+python pipeline/generate_models.py --resume
+python pipeline/generate_models.py --gender male   # one gender only
 ```
 
-Output: `generated_images/{model_id}.png` for each of the 27 model IDs in `prompts.json`
+**Output:** `generated_images/{model_id}.png` for each of the 27 IDs in `prompts.json`
 
-> **Pre-generated images are included** in this repository under `generated_images/` — skip this step if you want to use them directly.
+> **Pre-generated images are included** in `generated_images/` — skip this step
+> if you want to use them directly.
 
 ---
 
-### Step 4A — Generate Try-On Images (GPT Image 2)
+### Step 4A — Try-On with GPT Image 2
 
-Composites garments onto base models using GPT Image 2 edit endpoint:
+Uploads the base model PNG and garment reference photos to fal.ai, then
+calls GPT Image 2 edit to composite the garment onto the model.
+Best print fidelity; slower and more expensive than Z-Image Turbo.
 
 ```bash
 export FAL_KEY=your_key
-python tryon_samples.py
+python pipeline/tryon_gpt.py
 ```
 
-Edit the `SAMPLES` list at the top of `tryon_samples.py` to choose which products and models to use.
+Edit the `SAMPLES` list at the top of `tryon_gpt.py` to choose products and models.
 
-Output: `tryon_output/sample{n}_{model_id}_{product_handle}.png`
+**Quality settings** (set `QUALITY` in the script):
 
-**Quality settings** (`QUALITY` variable in the script):
-| Setting | Speed | Detail |
-|---------|-------|--------|
-| `low`   | ~30s  | Good for prototyping |
-| `medium`| ~2-4m | Better print detail |
-| `high`  | ~5-8m | Best quality |
+| Setting  | Speed  | Notes                        |
+|----------|--------|------------------------------|
+| `low`    | ~30 s  | Good for rapid iteration     |
+| `medium` | ~2-4 m | Better print reproduction    |
+| `high`   | ~5-8 m | Best quality for delivery    |
+
+**Output:** `tryon_output/sample{n}_{model_id}_{handle}.png`
 
 ---
 
-### Step 4B — Z-Image Turbo Try-On (fast, local, text-guided)
+### Step 4B — Try-On with Z-Image Turbo
 
-An alternative try-on approach using [Z-Image Turbo](https://huggingface.co/Tongyi-MAI/Z-Image-Turbo) — a 6B-parameter distilled model that edits the base model image via a garment text prompt in **~2-8 seconds** (GPU).
-
-**How it works:** `ZImageImg2ImgPipeline` partially noises the base model PNG and denoises it guided by the garment description. `strength=0.55` keeps the face and body shape intact while changing only the clothing.
-
-#### Local runner
+Faster and cheaper alternative using Z-Image Turbo image-to-image via fal.ai.
+Garment is described via text prompt — no reference image upload required.
+Best for high-volume generation where speed matters more than print fidelity.
 
 ```bash
-pip install diffusers>=0.38.0 transformers accelerate torch pillow
+export FAL_KEY=your_key
 
-# Single try-on: model M-REC_S3 wearing men's product #0
-python vton_zimage.py --model M-REC_S3 --product 0 --gender male
+# Single try-on
+python pipeline/tryon_zimage.py --model M-REC_S3 --product 0 --gender male
 
-# Batch: first 5 men's products × 5 male base models
-python vton_zimage.py --batch --gender male --max-products 5
+# Batch: first 5 men's products across 3 models
+python pipeline/tryon_zimage.py --batch --gender male --max-products 5
 
-# Tweak strength (lower = more of original preserved, higher = bigger edit)
-python vton_zimage.py --model F-HG_S3 --product 2 --gender female --strength 0.50
+# Adjust edit strength (lower = model identity better preserved)
+python pipeline/tryon_zimage.py --model F-HG_S4 --product 2 --gender female --strength 0.50
 ```
 
-Output: `tryon_output/zimage/{model_id}_{product_handle}.png`
+| Flag            | Default   | Description                                  |
+|-----------------|-----------|----------------------------------------------|
+| `--model`       | M-REC_S3  | Model ID from `prompts.json`                 |
+| `--product`     | 0         | 0-based product index in dataset JSON        |
+| `--gender`      | male      | `male`, `female`, or `both`                  |
+| `--strength`    | 0.55      | Edit strength (lower = more original kept)   |
+| `--batch`       | off       | Run multiple products x models               |
+| `--max-products`| 5         | Max products per gender in batch mode        |
 
-**Speed on common hardware:**
-| Hardware | Speed |
-|----------|-------|
-| A100 (40 GB) | ~1-2 s/image |
-| A10G (24 GB) | ~2-3 s/image |
-| T4 (16 GB)   | ~5-8 s/image |
-| CPU          | ~5 min/image |
+**Output:** `tryon_output/zimage_fal/{model_id}_{handle}.png`
 
-> Requires ~16 GB VRAM (`torch.bfloat16`). Use `--cpu` to run without a GPU (very slow).
+**Cost:** ~$0.004 per 768x1024 image on fal.ai
 
-#### Hugging Face Space deployment
-
-1. Create a new Space at [huggingface.co/new-space](https://huggingface.co/new-space)
-   - SDK: **Gradio**
-   - Hardware: **T4-small** (16 GB, ~$0.40/hr) or **A10G** for faster inference
-2. Upload `zimage_space/app.py` and `zimage_space/requirements.txt` to the Space
-3. The Space exposes a `/predict` API endpoint
-
-**Programmatic API call:**
-```python
-from gradio_client import Client
-client = Client("YOUR_USERNAME/YOUR_SPACE_NAME")
-result = client.predict(
-    model_image,                    # PIL Image or file path
-    "Navy Blue Slim-Fit Shirt",     # garment title
-    "Cotton, button-down collar",   # garment detail (optional)
-    "man",                          # gender
-    "Rectangle",                    # body type
-    "Medium / Olive",               # skin tone
-    0.55,                           # strength
-    42,                             # seed
-    api_name="/predict",
-)
-```
+> For local GPU inference (16 GB VRAM required), see `utils/tryon_zimage_local.py`.
 
 ---
 
 ### Step 5 — Face Swap
 
-Replaces the generated model's face with a target identity (personalised try-on).
+Replaces the model's face with a target identity for personalised try-on.
+Three options depending on your setup:
 
-Three options — see **[`swapper_model_test/README.md`](swapper_model_test/README.md)** for full setup:
-
-#### Option A: Replicate API (easiest)
+#### Option A: Replicate API (recommended, no local GPU needed)
 
 ```bash
 export REPLICATE_API_TOKEN=your_token
-python swapper_model_test/swapper_replicate_test.py
-# Or with explicit paths:
-python swapper_model_test/swapper_replicate_test.py \
+python face_swap/swap_replicate.py \
   --source generated_images/M-REC_S3.png \
   --target tryon_output/sample1_M-REC_S3_*.png
 ```
 
 #### Option B: Hugging Face Space
 
-1. Deploy `swapper_model_test/huggingface_space/` as a Gradio Space
-2. Call it:
+Deploy `spaces/face_swap/` as a Gradio Space, then call it:
 
 ```bash
 pip install gradio_client
-python swapper_model_test/call_hf_space.py \
-  --space YOUR_USERNAME/YOUR_SPACE_NAME \
+python face_swap/swap_hf_space.py \
+  --space YOUR_USERNAME/YOUR_SPACE \
   --source generated_images/M-REC_S3.png \
   --target tryon_output/sample1_M-REC_S3_*.png
 ```
 
-#### Option C: Local InsightFace (Python 3.10/3.11)
+#### Option C: Local InsightFace (Python 3.10 or 3.11)
 
 ```bash
-py -3.10 -m venv .venv-swapper
-.venv-swapper/Scripts/activate
-pip install -r swapper_model_test/requirements-local.txt
+pip install -r face_swap/requirements.txt
+# Place inswapper_128.onnx in face_swap/models/
+python face_swap/swap_local.py \
+  --model face_swap/models/inswapper_128.onnx \
+  --source generated_images/M-REC_S3.png \
+  --target tryon_output/sample1_M-REC_S3_*.png
+```
 
-# Place inswapper_128.onnx in swapper_model_test/models/
-python swapper_model_test/swapper_local_insightface.py \
-  --model swapper_model_test/models/inswapper_128.onnx
+#### Full end-to-end pipeline
+
+```bash
+python face_swap/run_pipeline.py \
+  --face your_photo.jpg \
+  --product 0 \
+  --gender male \
+  --model M-REC_S3
 ```
 
 ---
 
-## Model Matrix (`prompts.json`)
+## HF Space Deployments
+
+### Try-On Space (`spaces/tryon/`)
+
+Gradio app that runs Z-Image Turbo image-to-image inference.
+Upload a base model image, describe the garment, get a try-on result.
+
+**Deploy:**
+1. Create a new Space at [huggingface.co/new-space](https://huggingface.co/new-space)
+   - SDK: Gradio
+   - Hardware: T4-small (16 GB, ~$0.40/hr) or A10G
+2. Upload `spaces/tryon/app.py` and `spaces/tryon/requirements.txt`
+
+**API:**
+```python
+from gradio_client import Client
+
+client = Client("YOUR_USERNAME/YOUR_SPACE")
+result = client.predict(
+    base_model_image,
+    "Navy Blue Slim-Fit Shirt",
+    "Cotton, button-down collar",
+    "man",
+    "Rectangle",
+    "Medium / Olive",
+    0.55,   # strength
+    42,     # seed
+    api_name="/predict",
+)
+```
+
+### Face Swap Space (`spaces/face_swap/`)
+
+Gradio app powered by InsightFace inswapper_128.
+Upload source (face to take) and target (face to replace), get swapped result.
+
+**Deploy:**
+1. Create a new Space — SDK: Gradio, Hardware: CPU Basic
+2. Upload `spaces/face_swap/app.py`, `requirements.txt`, `packages.txt`
+
+---
+
+## Model Matrix
 
 27 base model images covering Indian body types and skin tones:
 
-| ID | Gender | Body Type | Skin Tone |
-|----|--------|-----------|-----------|
-| M-REC_S3 | Male | Rectangle | Medium / Olive |
-| M-REC_S4 | Male | Rectangle | Light Brown |
-| M-REC_S5 | Male | Rectangle | Dark Brown |
-| M-INV_S3 | Male | Inverted Trapezoid | Medium / Olive |
-| M-INV_S4 | Male | Inverted Trapezoid | Light Brown |
-| M-INV_S5 | Male | Inverted Trapezoid | Dark Brown |
-| M-TRI_S3 | Male | Triangle | Medium / Olive |
-| M-TRI_S4 | Male | Triangle | Light Brown |
-| M-TRI_S5 | Male | Triangle | Dark Brown |
-| M-OVL_S3 | Male | Oval | Medium / Olive |
-| M-OVL_S4 | Male | Oval | Light Brown |
-| M-OVL_S5 | Male | Oval | Dark Brown |
-| M-TRP_S3 | Male | Trapezoid | Medium / Olive |
-| M-TRP_S4 | Male | Trapezoid | Light Brown |
-| M-TRP_S5 | Male | Trapezoid | Dark Brown |
-| F-HG_S3 | Female | Hourglass | Medium / Olive |
-| F-HG_S4 | Female | Hourglass | Light Brown |
-| F-HG_S5 | Female | Hourglass | Dark Brown |
-| F-REC_S3 | Female | Rectangle | Medium / Olive |
-| F-REC_S4 | Female | Rectangle | Light Brown |
-| F-REC_S5 | Female | Rectangle | Dark Brown |
-| F-SPO_S3 | Female | Sporty | Medium / Olive |
-| F-SPO_S4 | Female | Sporty | Light Brown |
-| F-SPO_S5 | Female | Sporty | Dark Brown |
-| F-TRAP_S3 | Female | Trapezoid | Medium / Olive |
-| F-TRAP_S4 | Female | Trapezoid | Light Brown |
-| F-TRAP_S5 | Female | Trapezoid | Dark Brown |
+| ID         | Gender | Body Type          | Skin Tone      |
+|------------|--------|--------------------|----------------|
+| M-REC_S3   | Male   | Rectangle          | Medium / Olive |
+| M-REC_S4   | Male   | Rectangle          | Light Brown    |
+| M-REC_S5   | Male   | Rectangle          | Dark Brown     |
+| M-INV_S3   | Male   | Inverted Trapezoid | Medium / Olive |
+| M-INV_S4   | Male   | Inverted Trapezoid | Light Brown    |
+| M-INV_S5   | Male   | Inverted Trapezoid | Dark Brown     |
+| M-TRI_S3   | Male   | Triangle           | Medium / Olive |
+| M-TRI_S4   | Male   | Triangle           | Light Brown    |
+| M-TRI_S5   | Male   | Triangle           | Dark Brown     |
+| M-OVL_S3   | Male   | Oval               | Medium / Olive |
+| M-OVL_S4   | Male   | Oval               | Light Brown    |
+| M-OVL_S5   | Male   | Oval               | Dark Brown     |
+| M-TRP_S3   | Male   | Trapezoid          | Medium / Olive |
+| M-TRP_S4   | Male   | Trapezoid          | Light Brown    |
+| M-TRP_S5   | Male   | Trapezoid          | Dark Brown     |
+| F-HG_S3    | Female | Hourglass          | Medium / Olive |
+| F-HG_S4    | Female | Hourglass          | Light Brown    |
+| F-HG_S5    | Female | Hourglass          | Dark Brown     |
+| F-REC_S3   | Female | Rectangle          | Medium / Olive |
+| F-REC_S4   | Female | Rectangle          | Light Brown    |
+| F-REC_S5   | Female | Rectangle          | Dark Brown     |
+| F-SPO_S3   | Female | Sporty             | Medium / Olive |
+| F-SPO_S4   | Female | Sporty             | Light Brown    |
+| F-SPO_S5   | Female | Sporty             | Dark Brown     |
+| F-TRAP_S3  | Female | Trapezoid          | Medium / Olive |
+| F-TRAP_S4  | Female | Trapezoid          | Light Brown    |
+| F-TRAP_S5  | Female | Trapezoid          | Dark Brown     |
 
 ---
 
-## API Keys Required
+## API Keys
 
-| Script | Service | Where to get |
-|--------|---------|--------------|
-| `generate_models.py` | [fal.ai](https://fal.ai/dashboard/keys) | `FAL_KEY` |
-| `tryon_samples.py` | [fal.ai](https://fal.ai/dashboard/keys) | `FAL_KEY` |
-| `print_fidelity_test.py` | [fal.ai](https://fal.ai/dashboard/keys) | `FAL_KEY` |
-| `sophisticated_print_test.py` | [fal.ai](https://fal.ai/dashboard/keys) | `FAL_KEY` |
-| `classify_products.py` | [OpenRouter](https://openrouter.ai/settings/keys) | `OPENROUTER_API_KEY` |
-| `swapper_replicate_test.py` | [Replicate](https://replicate.com/account/api-tokens) | `REPLICATE_API_TOKEN` |
-| `run_hf_swap.py` / `call_hf_space.py` | Hugging Face (optional for private spaces) | `HF_TOKEN` |
-
----
-
-## Hugging Face Space Deployment
-
-The `swapper_model_test/huggingface_space/` folder is a ready-to-deploy Gradio app:
-
-1. Create a new Space at [huggingface.co/new-space](https://huggingface.co/new-space) (SDK: Gradio, Hardware: CPU Basic)
-2. Upload `app.py`, `requirements.txt`, `packages.txt` to the Space
-3. The Space exposes the `/swap` API endpoint
-
-Full step-by-step instructions in [`swapper_model_test/README.md`](swapper_model_test/README.md).
+| Script                  | Service      | Environment Variable    | Get Key                                      |
+|-------------------------|--------------|-------------------------|----------------------------------------------|
+| `pipeline/generate_models.py` | fal.ai  | `FAL_KEY`          | [fal.ai/dashboard/keys](https://fal.ai/dashboard/keys) |
+| `pipeline/tryon_gpt.py`       | fal.ai  | `FAL_KEY`          | [fal.ai/dashboard/keys](https://fal.ai/dashboard/keys) |
+| `pipeline/tryon_zimage.py`    | fal.ai  | `FAL_KEY`          | [fal.ai/dashboard/keys](https://fal.ai/dashboard/keys) |
+| `pipeline/classify.py`        | OpenRouter | `OPENROUTER_API_KEY` | [openrouter.ai/settings/keys](https://openrouter.ai/settings/keys) |
+| `face_swap/swap_replicate.py` | Replicate | `REPLICATE_API_TOKEN` | [replicate.com/account/api-tokens](https://replicate.com/account/api-tokens) |
+| `face_swap/swap_hf_space.py`  | Hugging Face (private spaces only) | `HF_TOKEN` | [huggingface.co/settings/tokens](https://huggingface.co/settings/tokens) |
 
 ---
 
 ## Technology Stack
 
-| Component | Technology |
-|-----------|-----------|
-| Base model generation | GPT Image 2 via [fal.ai](https://fal.ai) |
-| VTON composition (Step 4A) | GPT Image 2 Edit via [fal.ai](https://fal.ai) |
-| VTON composition (Step 4B) | [Z-Image Turbo](https://huggingface.co/Tongyi-MAI/Z-Image-Turbo) via diffusers |
-| Product classification | GPT-4o Vision via [OpenRouter](https://openrouter.ai) |
-| Face swap (cloud) | InsightFace inswapper_128 via [Replicate](https://replicate.com) |
-| Face swap (local) | InsightFace + ONNX Runtime |
-| Face swap (API) | Gradio Space on Hugging Face |
-| Data scraping | Westside Shopify JSON API |
-
----
-
-## Notes
-
-- The scraper uses the public Shopify `products.json` endpoint — no authentication needed
-- `classify_products.py` sends product images as **local base64** (not remote URLs) for better accuracy and to avoid CDN auth issues
-- The face swap step uses only the face region and should preserve garment details intact
-- For production use, verify licensing for `inswapper_128.onnx` — see `swapper_model_test/README.md`
+| Component               | Technology                                                  |
+|-------------------------|-------------------------------------------------------------|
+| Base model generation   | GPT Image 2 via [fal.ai](https://fal.ai)                   |
+| Try-on (GPT)            | GPT Image 2 Edit via [fal.ai](https://fal.ai)              |
+| Try-on (Z-Image)        | [Z-Image Turbo](https://huggingface.co/Tongyi-MAI/Z-Image-Turbo) via fal.ai |
+| Product classification  | GPT-4o Vision via [OpenRouter](https://openrouter.ai)       |
+| Face swap (cloud)       | InsightFace inswapper_128 via [Replicate](https://replicate.com) |
+| Face swap (local)       | InsightFace + ONNX Runtime                                  |
+| Data scraping           | Westside Shopify public JSON API                            |

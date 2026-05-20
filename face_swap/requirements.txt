@@ -1,0 +1,11 @@
+# Local InsightFace runner (swap_local.py)
+# Requires Python 3.10 or 3.11
+insightface==0.7.3
+onnxruntime
+opencv-python
+numpy
+
+# HF Space API caller (swap_hf_space.py, run_hf_swap.py, run_pipeline.py)
+gradio_client
+
+# Replicate API runner (swap_replicate.py) -- no extra packages needed

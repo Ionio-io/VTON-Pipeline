@@ -36,13 +36,13 @@ ENV/
 Thumbs.db
 
 # Large model files — download separately
-swapper_model_test/models/*.onnx
+face_swap/models/*.onnx
 
 # Pipeline outputs — generated at runtime
 tryon_output/
 generation_log.json
 
-# Scraped product images — re-runnable via scrape_westside.py
+# Scraped product images — re-runnable via pipeline/scrape.py
 westside_dataset/images/
 
 # Zip archives

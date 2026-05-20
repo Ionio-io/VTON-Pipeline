@@ -1,2 +1,0 @@
-# The Replicate script uses only Python standard library modules.
-# No pip packages are required.
