@@ -1,0 +1,16 @@
+# Core pipeline dependencies
+fal-client>=0.5.0
+
+# Required by print_fidelity_test.py and sophisticated_print_test.py
+# (used for downloading result images; stdlib urllib is preferred elsewhere)
+requests>=2.31.0
+
+# ── Optional: swapper_handoff scripts ────────────────────────────────────────
+# pip install gradio_client opencv-python numpy
+
+# ── Optional: swapper_model_test local path ──────────────────────────────────
+# Use Python 3.10 or 3.11 for InsightFace compatibility
+# pip install insightface==0.7.3 onnxruntime opencv-python numpy
+
+# ── Optional: swapper_model_test HF Space ────────────────────────────────────
+# See swapper_model_test/huggingface_space/requirements.txt

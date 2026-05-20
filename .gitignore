@@ -1,0 +1,52 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+.eggs/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+.venv-swapper/
+
+# Environment / secrets
+.env
+.env.local
+*.env
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Large model files — download separately
+swapper_model_test/models/*.onnx
+
+# Pipeline outputs — generated at runtime
+tryon_output/
+generation_log.json
+
+# Scraped product images — re-runnable via scrape_westside.py
+westside_dataset/images/
+
+# Zip archives
+*.zip
+
+# Claude Code
+.claude/
