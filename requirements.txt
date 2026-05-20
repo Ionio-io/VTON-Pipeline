@@ -1,9 +1,12 @@
-# Core pipeline dependencies
+# Core pipeline dependencies (Steps 1-4: scrape, classify, generate, tryon)
 fal-client>=0.5.0
 
 # Required by print_fidelity_test.py and sophisticated_print_test.py
-# (used for downloading result images; stdlib urllib is preferred elsewhere)
 requests>=2.31.0
+
+# ── Optional: vton_zimage.py (Z-Image Turbo local runner) ────────────────────
+# Requires ~16 GB VRAM. Use Python 3.10 or 3.11.
+# pip install diffusers>=0.38.0 transformers accelerate torch pillow
 
 # ── Optional: swapper_handoff scripts ────────────────────────────────────────
 # pip install gradio_client opencv-python numpy
@@ -14,3 +17,6 @@ requests>=2.31.0
 
 # ── Optional: swapper_model_test HF Space ────────────────────────────────────
 # See swapper_model_test/huggingface_space/requirements.txt
+
+# ── Optional: zimage_space HF Space ──────────────────────────────────────────
+# See zimage_space/requirements.txt

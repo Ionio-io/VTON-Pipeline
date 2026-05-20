@@ -96,7 +96,8 @@ VTON-Pipeline/
 ├── classify_products.py          ← Step 2: GPT-4o Vision product classifier
 ├── fix_missing_images.py         ← Step 2b: backfill missing product images
 ├── generate_models.py            ← Step 3: batch-generate base model images
-├── tryon_samples.py              ← Step 4: VTON composite generation
+├── tryon_samples.py              ← Step 4: VTON composite (GPT Image 2 edit)
+├── vton_zimage.py                ← Step 4 alt: Z-Image Turbo VTON (local, fast)
 ├── print_fidelity_test.py        ← quality test: micro-print & geometric prints
 ├── sophisticated_print_test.py   ← quality test: scenic & ethnic prints (medium)
 │
@@ -109,6 +110,10 @@ VTON-Pipeline/
 │   ├── products_men.json         ← 50 men's clothing items (metadata + image URLs)
 │   └── products_women.json       ← 50 women's clothing items
 │   └── images/                   ← scraped product images (run scrape_westside.py)
+│
+├── zimage_space/                 ← Z-Image Turbo VTON as a Hugging Face Space
+│   ├── app.py                    ← Gradio app + /predict API endpoint
+│   └── requirements.txt
 │
 ├── swapper_model_test/           ← Step 5: face swap model testing
 │   ├── README.md                 ← detailed setup + usage guide
@@ -190,7 +195,7 @@ Output: `generated_images/{model_id}.png` for each of the 27 model IDs in `promp
 
 ---
 
-### Step 4 — Generate Try-On Images
+### Step 4A — Generate Try-On Images (GPT Image 2)
 
 Composites garments onto base models using GPT Image 2 edit endpoint:
 
@@ -209,6 +214,66 @@ Output: `tryon_output/sample{n}_{model_id}_{product_handle}.png`
 | `low`   | ~30s  | Good for prototyping |
 | `medium`| ~2-4m | Better print detail |
 | `high`  | ~5-8m | Best quality |
+
+---
+
+### Step 4B — Z-Image Turbo Try-On (fast, local, text-guided)
+
+An alternative try-on approach using [Z-Image Turbo](https://huggingface.co/Tongyi-MAI/Z-Image-Turbo) — a 6B-parameter distilled model that edits the base model image via a garment text prompt in **~2-8 seconds** (GPU).
+
+**How it works:** `ZImageImg2ImgPipeline` partially noises the base model PNG and denoises it guided by the garment description. `strength=0.55` keeps the face and body shape intact while changing only the clothing.
+
+#### Local runner
+
+```bash
+pip install diffusers>=0.38.0 transformers accelerate torch pillow
+
+# Single try-on: model M-REC_S3 wearing men's product #0
+python vton_zimage.py --model M-REC_S3 --product 0 --gender male
+
+# Batch: first 5 men's products × 5 male base models
+python vton_zimage.py --batch --gender male --max-products 5
+
+# Tweak strength (lower = more of original preserved, higher = bigger edit)
+python vton_zimage.py --model F-HG_S3 --product 2 --gender female --strength 0.50
+```
+
+Output: `tryon_output/zimage/{model_id}_{product_handle}.png`
+
+**Speed on common hardware:**
+| Hardware | Speed |
+|----------|-------|
+| A100 (40 GB) | ~1-2 s/image |
+| A10G (24 GB) | ~2-3 s/image |
+| T4 (16 GB)   | ~5-8 s/image |
+| CPU          | ~5 min/image |
+
+> Requires ~16 GB VRAM (`torch.bfloat16`). Use `--cpu` to run without a GPU (very slow).
+
+#### Hugging Face Space deployment
+
+1. Create a new Space at [huggingface.co/new-space](https://huggingface.co/new-space)
+   - SDK: **Gradio**
+   - Hardware: **T4-small** (16 GB, ~$0.40/hr) or **A10G** for faster inference
+2. Upload `zimage_space/app.py` and `zimage_space/requirements.txt` to the Space
+3. The Space exposes a `/predict` API endpoint
+
+**Programmatic API call:**
+```python
+from gradio_client import Client
+client = Client("YOUR_USERNAME/YOUR_SPACE_NAME")
+result = client.predict(
+    model_image,                    # PIL Image or file path
+    "Navy Blue Slim-Fit Shirt",     # garment title
+    "Cotton, button-down collar",   # garment detail (optional)
+    "man",                          # gender
+    "Rectangle",                    # body type
+    "Medium / Olive",               # skin tone
+    0.55,                           # strength
+    42,                             # seed
+    api_name="/predict",
+)
+```
 
 ---
 
@@ -323,7 +388,8 @@ Full step-by-step instructions in [`swapper_model_test/README.md`](swapper_model
 | Component | Technology |
 |-----------|-----------|
 | Base model generation | GPT Image 2 via [fal.ai](https://fal.ai) |
-| VTON composition | GPT Image 2 Edit via [fal.ai](https://fal.ai) |
+| VTON composition (Step 4A) | GPT Image 2 Edit via [fal.ai](https://fal.ai) |
+| VTON composition (Step 4B) | [Z-Image Turbo](https://huggingface.co/Tongyi-MAI/Z-Image-Turbo) via diffusers |
 | Product classification | GPT-4o Vision via [OpenRouter](https://openrouter.ai) |
 | Face swap (cloud) | InsightFace inswapper_128 via [Replicate](https://replicate.com) |
 | Face swap (local) | InsightFace + ONNX Runtime |
